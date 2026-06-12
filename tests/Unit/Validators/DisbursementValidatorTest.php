@@ -99,6 +99,12 @@ class DisbursementValidatorTest extends TestCase
                 },
                 'The reference field is required.',
             ],
+            'missing amount' => [
+                static function (array &$payload): void {
+                    unset($payload['amount']);
+                },
+                'The amount field is required.',
+            ],
             'amount below minimum' => [
                 static function (array &$payload): void {
                     $payload['amount'] = 10;
@@ -134,6 +140,12 @@ class DisbursementValidatorTest extends TestCase
                     $payload['transactionList'][0]['destinationBankCode'] = '1234';
                 },
                 'The transactionList.0.destinationBankCode field must not be greater than 3 characters.',
+            ],
+            'missing nested transaction amount' => [
+                static function (array &$payload): void {
+                    unset($payload['transactionList'][0]['amount']);
+                },
+                'The transactionList.0.amount field is required.',
             ],
         ];
     }
