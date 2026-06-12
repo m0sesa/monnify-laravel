@@ -4,28 +4,51 @@ namespace Monnify\MonnifyLaravel\Services;
 
 use GuzzleHttp\Client;
 use InvalidArgumentException;
+use Monnify\MonnifyLaravel\Support\BuildsCoreClient;
+use Monnify\MonnifyLaravel\Support\LaravelHttpClient;
+use Monnify\MonnifyLaravel\Support\MapsSdkResponses;
 use Monnify\MonnifyLaravel\Validators\CustomerReservedAccountValidator;
+use Monnify\Services\CustomerReservedAccountService as CoreCustomerReservedAccountService;
 
 class CustomerReservedAccountService extends BaseService
 {
-    private CustomerReservedAccountValidator $validator;
+    use BuildsCoreClient;
+    use MapsSdkResponses;
 
-    public function __construct(Client $client, ?CustomerReservedAccountValidator $validator = null)
-    {
+    private CustomerReservedAccountValidator $validator;
+    private LaravelHttpClient $laravelHttpClient;
+    private CoreCustomerReservedAccountService $coreService;
+
+    public function __construct(
+        Client $client,
+        ?CustomerReservedAccountValidator $validator = null,
+        ?CoreCustomerReservedAccountService $coreService = null,
+        ?LaravelHttpClient $laravelHttpClient = null,
+    ) {
         parent::__construct($client);
         $this->validator = $validator ?? new CustomerReservedAccountValidator();
+        $this->laravelHttpClient = $laravelHttpClient ?? new LaravelHttpClient($client);
+        $this->coreService = $coreService ?? new CoreCustomerReservedAccountService($this->buildCoreClient($client, $this->laravelHttpClient));
     }
 
     public function createGeneralAccount(array $data): array
     {
         $this->validator->validateCreateGeneralAccount($data);
-        return $this->requestPost('/api/v2/bank-transfer/reserved-accounts', $data);
+
+        return $this->mapSdkResponse(
+            $this->laravelHttpClient,
+            fn () => $this->coreService->createGeneralAccount($data),
+        );
     }
 
     public function createInvoiceAccount(array $data): array
     {
         $this->validator->validateCreateInvoiceAccount($data);
-        return $this->requestPost('/api/v1/bank-transfer/reserved-accounts', $data);
+
+        return $this->mapSdkResponse(
+            $this->laravelHttpClient,
+            fn () => $this->coreService->createInvoiceAccount($data),
+        );
     }
 
     public function get(string $accountReference): array
@@ -34,7 +57,10 @@ class CustomerReservedAccountService extends BaseService
             throw new InvalidArgumentException('Account Reference must be provided');
         }
 
-        return $this->requestGet('/api/v2/bank-transfer/reserved-accounts/'. $accountReference);
+        return $this->mapSdkResponse(
+            $this->laravelHttpClient,
+            fn () => $this->coreService->get($accountReference),
+        );
     }
 
     public function addLinkedAccounts(string $accountReference, array $data = []): array
@@ -44,7 +70,11 @@ class CustomerReservedAccountService extends BaseService
         }
 
         $this->validator->validateAddLinkedAccounts($data);
-        return $this->requestPut('/api/v1/bank-transfer/reserved-accounts/add-linked-accounts/'. $accountReference, $data);
+
+        return $this->mapSdkResponse(
+            $this->laravelHttpClient,
+            fn () => $this->coreService->addLinkedAccounts($accountReference, $data),
+        );
     }
 
     public function updateBVN(string $accountReference, string $bvn): array
@@ -53,7 +83,10 @@ class CustomerReservedAccountService extends BaseService
             throw new InvalidArgumentException('Account Reference must be provided');
         }
 
-        return $this->requestPut('/api/v1/bank-transfer/reserved-accounts/update-customer-bvn/'. $accountReference, ['bvn' => $bvn]);
+        return $this->mapSdkResponse(
+            $this->laravelHttpClient,
+            fn () => $this->coreService->updateBVN($accountReference, $bvn),
+        );
     }
 
     public function allowedPaymentSource(string $accountReference, array $data): array
@@ -63,7 +96,11 @@ class CustomerReservedAccountService extends BaseService
         }
 
         $this->validator->validateAllowedPaymentSource($data);
-        return $this->requestPut('/api/v1/bank-transfer/reserved-accounts/update-payment-source-filter/'. $accountReference, $data);
+
+        return $this->mapSdkResponse(
+            $this->laravelHttpClient,
+            fn () => $this->coreService->allowedPaymentSource($accountReference, $data),
+        );
     }
 
     public function updateSplitConfig(string $accountReference, array $data): array
@@ -73,7 +110,11 @@ class CustomerReservedAccountService extends BaseService
         }
 
         $this->validator->validateUpdateSplitConfig($data);
-        return $this->requestPut('/api/v1/bank-transfer/reserved-accounts/update-income-split-config/'. $accountReference, $data);
+
+        return $this->mapSdkResponse(
+            $this->laravelHttpClient,
+            fn () => $this->coreService->updateSplitConfig($accountReference, $data),
+        );
     }
 
     public function deallocateAccount(string $accountReference): array
@@ -82,7 +123,10 @@ class CustomerReservedAccountService extends BaseService
             throw new InvalidArgumentException('Account Reference must be provided');
         }
 
-        return $this->requestDelete('/api/v1/bank-transfer/reserved-accounts/reference/'. $accountReference);
+        return $this->mapSdkResponse(
+            $this->laravelHttpClient,
+            fn () => $this->coreService->deallocateAccount($accountReference),
+        );
     }
 
     public function transactions(string $accountReference, array $parameters = []): array
@@ -92,8 +136,11 @@ class CustomerReservedAccountService extends BaseService
         }
 
         $this->validator->validateGetReservedAccountTransactions($parameters);
-        $parameters = array_merge(['accountReference' => $accountReference], $parameters);
-        return $this->requestGet('/api/v1/bank-transfer/reserved-accounts/transactions', $parameters);
+
+        return $this->mapSdkResponse(
+            $this->laravelHttpClient,
+            fn () => $this->coreService->transactions($accountReference, $parameters),
+        );
     }
 
     public function updateKYCInfo(string $accountReference, array $data): array
@@ -103,6 +150,10 @@ class CustomerReservedAccountService extends BaseService
         }
         
         $this->validator->validateUpdateKYCInfo($data);
-        return $this->requestPut('/api/v1/bank-transfer/reserved-accounts/'.$accountReference.'/kyc-info', $data);
+
+        return $this->mapSdkResponse(
+            $this->laravelHttpClient,
+            fn () => $this->coreService->updateKYCInfo($accountReference, $data),
+        );
     }
 }

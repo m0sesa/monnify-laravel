@@ -185,6 +185,12 @@ class CustomerReservedAccountValidatorTest extends TestCase
                 },
                 'The bvn field is required.',
             ],
+            'invalid allowed payment source' => [
+                static function (array &$payload): void {
+                    $payload['allowedPaymentSource'] = 'invalid';
+                },
+                'The allowed payment source field must be an array.',
+            ],
         ];
     }
 

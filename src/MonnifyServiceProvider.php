@@ -47,6 +47,7 @@ use Monnify\MonnifyLaravel\Support\{
     MonnifyConfigFactory
 };
 use Monnify\Services\OtherService as CoreOtherService;
+use Monnify\Services\CustomerReservedAccountService as CoreCustomerReservedAccountService;
 use Monnify\Services\TransactionService as CoreTransactionService;
 
 /**
@@ -156,6 +157,10 @@ class MonnifyServiceProvider extends ServiceProvider
 
         $this->app->singleton(CoreOtherService::class, function ($app) {
             return new CoreOtherService($app->make(MonnifyApiClient::class));
+        });
+
+        $this->app->singleton(CoreCustomerReservedAccountService::class, function ($app) {
+            return new CoreCustomerReservedAccountService($app->make(MonnifyApiClient::class));
         });
     }
 
