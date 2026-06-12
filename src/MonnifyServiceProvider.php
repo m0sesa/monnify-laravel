@@ -4,7 +4,11 @@ namespace Monnify\MonnifyLaravel;
 
 use Error;
 use GuzzleHttp\Client;
+use Illuminate\Contracts\Cache\Repository;
 use Illuminate\Support\ServiceProvider;
+use Monnify\Auth\TokenCacheInterface;
+use Monnify\Http\MonnifyApiClient;
+use Monnify\MonnifyConfig;
 use Monnify\MonnifyLaravel\Services\{
     BillsPaymentService,
     CustomerReservedAccountService,
@@ -37,6 +41,13 @@ use Monnify\MonnifyLaravel\Validators\{
     VerificationValidator,
     WalletValidator
 };
+use Monnify\MonnifyLaravel\Support\{
+    LaravelHttpClient,
+    LaravelTokenCache,
+    MonnifyConfigFactory
+};
+use Monnify\Services\OtherService as CoreOtherService;
+use Monnify\Services\TransactionService as CoreTransactionService;
 
 /**
  * Class MonnifyServiceProvider
@@ -95,6 +106,7 @@ class MonnifyServiceProvider extends ServiceProvider
             ]);
         });
 
+        $this->registerCoreBindings();
         $this->registerValidatorSingletons();
         $this->registerServiceContextualBindings();
         $this->registerServiceSingletons();
@@ -116,6 +128,35 @@ class MonnifyServiceProvider extends ServiceProvider
         $this->app->when(self::SERVICE_CLASSES)
             ->needs(Client::class)
             ->give(fn ($app) => $app->make(self::HTTP_CLIENT_BINDING));
+    }
+
+    protected function registerCoreBindings(): void
+    {
+        $this->app->singleton(MonnifyConfig::class, fn () => MonnifyConfigFactory::make());
+
+        $this->app->singleton(LaravelHttpClient::class, function ($app) {
+            return new LaravelHttpClient($app->make(self::HTTP_CLIENT_BINDING));
+        });
+
+        $this->app->singleton(TokenCacheInterface::class, function ($app) {
+            return new LaravelTokenCache($app->make(Repository::class));
+        });
+
+        $this->app->singleton(MonnifyApiClient::class, function ($app) {
+            return new MonnifyApiClient(
+                $app->make(MonnifyConfig::class),
+                $app->make(LaravelHttpClient::class),
+                $app->make(TokenCacheInterface::class),
+            );
+        });
+
+        $this->app->singleton(CoreTransactionService::class, function ($app) {
+            return new CoreTransactionService($app->make(MonnifyApiClient::class));
+        });
+
+        $this->app->singleton(CoreOtherService::class, function ($app) {
+            return new CoreOtherService($app->make(MonnifyApiClient::class));
+        });
     }
 
     protected function registerServiceSingletons(): void

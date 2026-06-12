@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d3097055cfeaf98575487b5dec04ff09",
+    "content-hash": "e70697f9700ecaee6134c2ba64b5dc1f",
     "packages": [
         {
             "name": "brick/math",
@@ -1761,6 +1761,57 @@
                 }
             ],
             "time": "2024-09-21T08:32:55+00:00"
+        },
+        {
+            "name": "monnify/monnify-php",
+            "version": "dev-refactor/core-sdk-unification",
+            "dist": {
+                "type": "path",
+                "url": "../Monnify-PHP-SDK",
+                "reference": "a14a4b7a6e9cab7076400176f7a6da331b42fe86"
+            },
+            "require": {
+                "guzzlehttp/guzzle": "^7.0",
+                "php": "^8.1"
+            },
+            "require-dev": {
+                "phpstan/phpstan": "^2.0",
+                "phpunit/phpunit": "^10.0|^11.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Monnify\\": "src/"
+                }
+            },
+            "autoload-dev": {
+                "psr-4": {
+                    "Monnify\\Tests\\": "tests/"
+                }
+            },
+            "scripts": {
+                "test": [
+                    "phpunit"
+                ],
+                "analyse": [
+                    "phpstan analyse --debug"
+                ]
+            },
+            "license": [
+                "MIT"
+            ],
+            "description": "Framework-agnostic PHP SDK for the Monnify API",
+            "homepage": "https://github.com/Monnify/Monnify-PHP-SDK",
+            "keywords": [
+                "monnify",
+                "payment-gateway",
+                "payments",
+                "php-sdk"
+            ],
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
         },
         {
             "name": "monolog/monolog",
@@ -8206,7 +8257,9 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {},
+    "stability-flags": {
+        "monnify/monnify-php": 20
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
@@ -8216,5 +8269,5 @@
     "platform-overrides": {
         "php": "8.2"
     },
-    "plugin-api-version": "2.9.0"
+    "plugin-api-version": "2.6.0"
 }

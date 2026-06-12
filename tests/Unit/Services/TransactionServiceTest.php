@@ -46,6 +46,19 @@ class TransactionServiceTest extends TestCase
     }
 
     #[Test]
+    public function initialise_preserves_the_laravel_error_envelope(): void
+    {
+        $service = new TransactionService($this->makeClient([
+            new Response(400, [], json_encode(['requestSuccessful' => false, 'responseMessage' => 'Invalid request'])),
+        ]));
+
+        $result = $service->initialise($this->validInitializePayload());
+
+        $this->assertSame(400, $result['status']);
+        $this->assertSame('Invalid request', $result['error']->responseMessage);
+    }
+
+    #[Test]
     public function pay_with_bank_transfer_posts_the_expected_payload(): void
     {
         $payload = ['transactionReference' => 'txn-ref', 'bankCode' => '058'];
