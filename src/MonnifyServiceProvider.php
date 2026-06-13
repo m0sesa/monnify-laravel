@@ -46,10 +46,21 @@ use Monnify\MonnifyLaravel\Support\{
     LaravelTokenCache,
     MonnifyConfigFactory
 };
-use Monnify\Services\OtherService as CoreOtherService;
+use Monnify\Services\BillsPaymentService as CoreBillsPaymentService;
 use Monnify\Services\CustomerReservedAccountService as CoreCustomerReservedAccountService;
+use Monnify\Services\DirectDebitService as CoreDirectDebitService;
 use Monnify\Services\DisbursementService as CoreDisbursementService;
+use Monnify\Services\InvoiceService as CoreInvoiceService;
+use Monnify\Services\LimitProfileService as CoreLimitProfileService;
+use Monnify\Services\OtherService as CoreOtherService;
+use Monnify\Services\PayCodeService as CorePayCodeService;
+use Monnify\Services\RecurringPaymentService as CoreRecurringPaymentService;
+use Monnify\Services\RefundService as CoreRefundService;
+use Monnify\Services\SettlementService as CoreSettlementService;
+use Monnify\Services\SubAccountService as CoreSubAccountService;
 use Monnify\Services\TransactionService as CoreTransactionService;
+use Monnify\Services\VerificationService as CoreVerificationService;
+use Monnify\Services\WalletService as CoreWalletService;
 
 /**
  * Class MonnifyServiceProvider
@@ -156,6 +167,10 @@ class MonnifyServiceProvider extends ServiceProvider
             return new CoreTransactionService($app->make(MonnifyApiClient::class));
         });
 
+        $this->app->singleton(CoreBillsPaymentService::class, function ($app) {
+            return new CoreBillsPaymentService($app->make(MonnifyApiClient::class));
+        });
+
         $this->app->singleton(CoreOtherService::class, function ($app) {
             return new CoreOtherService($app->make(MonnifyApiClient::class));
         });
@@ -166,6 +181,46 @@ class MonnifyServiceProvider extends ServiceProvider
 
         $this->app->singleton(CoreDisbursementService::class, function ($app) {
             return new CoreDisbursementService($app->make(MonnifyApiClient::class));
+        });
+
+        $this->app->singleton(CoreDirectDebitService::class, function ($app) {
+            return new CoreDirectDebitService($app->make(MonnifyApiClient::class));
+        });
+
+        $this->app->singleton(CoreInvoiceService::class, function ($app) {
+            return new CoreInvoiceService($app->make(MonnifyApiClient::class));
+        });
+
+        $this->app->singleton(CoreLimitProfileService::class, function ($app) {
+            return new CoreLimitProfileService($app->make(MonnifyApiClient::class));
+        });
+
+        $this->app->singleton(CorePayCodeService::class, function ($app) {
+            return new CorePayCodeService($app->make(MonnifyApiClient::class));
+        });
+
+        $this->app->singleton(CoreRecurringPaymentService::class, function ($app) {
+            return new CoreRecurringPaymentService($app->make(MonnifyApiClient::class));
+        });
+
+        $this->app->singleton(CoreRefundService::class, function ($app) {
+            return new CoreRefundService($app->make(MonnifyApiClient::class));
+        });
+
+        $this->app->singleton(CoreSettlementService::class, function ($app) {
+            return new CoreSettlementService($app->make(MonnifyApiClient::class));
+        });
+
+        $this->app->singleton(CoreSubAccountService::class, function ($app) {
+            return new CoreSubAccountService($app->make(MonnifyApiClient::class));
+        });
+
+        $this->app->singleton(CoreVerificationService::class, function ($app) {
+            return new CoreVerificationService($app->make(MonnifyApiClient::class));
+        });
+
+        $this->app->singleton(CoreWalletService::class, function ($app) {
+            return new CoreWalletService($app->make(MonnifyApiClient::class));
         });
     }
 

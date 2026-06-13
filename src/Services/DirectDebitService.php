@@ -4,22 +4,41 @@ namespace Monnify\MonnifyLaravel\Services;
 
 use GuzzleHttp\Client;
 use InvalidArgumentException;
+use Monnify\MonnifyLaravel\Support\BuildsCoreClient;
+use Monnify\MonnifyLaravel\Support\LaravelHttpClient;
+use Monnify\MonnifyLaravel\Support\MapsSdkResponses;
 use Monnify\MonnifyLaravel\Validators\DirectDebitValidator;
+use Monnify\Services\DirectDebitService as CoreDirectDebitService;
 
-class DirectDebitService extends BaseService 
+class DirectDebitService extends BaseService
 {
-    private DirectDebitValidator $validator;
+    use BuildsCoreClient;
+    use MapsSdkResponses;
 
-    public function __construct(Client $client, ?DirectDebitValidator $validator = null)
-    {
+    private DirectDebitValidator $validator;
+    private LaravelHttpClient $laravelHttpClient;
+    private CoreDirectDebitService $coreService;
+
+    public function __construct(
+        Client $client,
+        ?DirectDebitValidator $validator = null,
+        ?CoreDirectDebitService $coreService = null,
+        ?LaravelHttpClient $laravelHttpClient = null,
+    ) {
         parent::__construct($client);
         $this->validator = $validator ?? new DirectDebitValidator();
+        $this->laravelHttpClient = $laravelHttpClient ?? new LaravelHttpClient($client);
+        $this->coreService = $coreService ?? new CoreDirectDebitService($this->buildCoreClient($client, $this->laravelHttpClient));
     }
 
     public function create(array $data): array
     {
         $this->validator->validateMandate($data);
-        return $this->requestPost('/api/v1/direct-debit/mandate/create', $data);
+
+        return $this->mapSdkResponse(
+            $this->laravelHttpClient,
+            fn () => $this->coreService->create($data),
+        );
     }
 
     public function get(string $mandateReference): array
@@ -28,13 +47,20 @@ class DirectDebitService extends BaseService
             throw new InvalidArgumentException('Mandate Reference must be provided.');
         }
 
-        return $this->requestGet('/api/v1/direct-debit/mandate/', ['mandateReferences' => $mandateReference]);
+        return $this->mapSdkResponse(
+            $this->laravelHttpClient,
+            fn () => $this->coreService->get($mandateReference),
+        );
     }
 
     public function debit(array $data): array
     {
         $this->validator->validateDebit($data);
-        return $this->requestPost('/api/v1/direct-debit/mandate/debit', $data);
+
+        return $this->mapSdkResponse(
+            $this->laravelHttpClient,
+            fn () => $this->coreService->debit($data),
+        );
     }
 
     public function status(string $paymentReference): array
@@ -43,7 +69,10 @@ class DirectDebitService extends BaseService
             throw new InvalidArgumentException('Payment Reference must be provided.');
         }
 
-        return $this->requestGet('/api/v1/direct-debit/mandate/debit-status', ['paymentReference' => $paymentReference]);
+        return $this->mapSdkResponse(
+            $this->laravelHttpClient,
+            fn () => $this->coreService->status($paymentReference),
+        );
     }
 
     public function cancel(string $mandateCode): array
@@ -52,6 +81,9 @@ class DirectDebitService extends BaseService
             throw new InvalidArgumentException('Mandate Code must be provided.');
         }
 
-        return $this->requestPatch('/api/v1/direct-debit/mandate/cancel-mandate/'. $mandateCode);
+        return $this->mapSdkResponse(
+            $this->laravelHttpClient,
+            fn () => $this->coreService->cancel($mandateCode),
+        );
     }
 }

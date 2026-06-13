@@ -3,21 +3,40 @@
 namespace Monnify\MonnifyLaravel\Services;
 
 use GuzzleHttp\Client;
+use Monnify\MonnifyLaravel\Support\BuildsCoreClient;
+use Monnify\MonnifyLaravel\Support\LaravelHttpClient;
+use Monnify\MonnifyLaravel\Support\MapsSdkResponses;
 use Monnify\MonnifyLaravel\Validators\RecurringPaymentValidator;
+use Monnify\Services\RecurringPaymentService as CoreRecurringPaymentService;
 
 class RecurringPaymentService extends BaseService
 {
-    private RecurringPaymentValidator $validator;
+    use BuildsCoreClient;
+    use MapsSdkResponses;
 
-    public function __construct(Client $client, ?RecurringPaymentValidator $validator = null)
-    {
+    private RecurringPaymentValidator $validator;
+    private LaravelHttpClient $laravelHttpClient;
+    private CoreRecurringPaymentService $coreService;
+
+    public function __construct(
+        Client $client,
+        ?RecurringPaymentValidator $validator = null,
+        ?CoreRecurringPaymentService $coreService = null,
+        ?LaravelHttpClient $laravelHttpClient = null,
+    ) {
         parent::__construct($client);
         $this->validator = $validator ?? new RecurringPaymentValidator();
+        $this->laravelHttpClient = $laravelHttpClient ?? new LaravelHttpClient($client);
+        $this->coreService = $coreService ?? new CoreRecurringPaymentService($this->buildCoreClient($client, $this->laravelHttpClient));
     }
-    
+
     public function chargeCardToken(array $data): array
     {
         $this->validator->validateChargeCardToken($data);
-        return $this->requestPost('/api/v1/merchant/cards/charge-card-token', $data);
+
+        return $this->mapSdkResponse(
+            $this->laravelHttpClient,
+            fn () => $this->coreService->chargeCardToken($data),
+        );
     }
 }

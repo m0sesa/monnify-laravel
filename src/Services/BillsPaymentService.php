@@ -3,16 +3,31 @@
 namespace Monnify\MonnifyLaravel\Services;
 
 use GuzzleHttp\Client;
+use Monnify\MonnifyLaravel\Support\BuildsCoreClient;
+use Monnify\MonnifyLaravel\Support\LaravelHttpClient;
+use Monnify\MonnifyLaravel\Support\MapsSdkResponses;
 use Monnify\MonnifyLaravel\Validators\BillsPaymentValidator;
+use Monnify\Services\BillsPaymentService as CoreBillsPaymentService;
 
 class BillsPaymentService extends BaseService
 {
-    private BillsPaymentValidator $validator;
+    use BuildsCoreClient;
+    use MapsSdkResponses;
 
-    public function __construct(Client $client, ?BillsPaymentValidator $validator = null)
-    {
+    private BillsPaymentValidator $validator;
+    private LaravelHttpClient $laravelHttpClient;
+    private CoreBillsPaymentService $coreService;
+
+    public function __construct(
+        Client $client,
+        ?BillsPaymentValidator $validator = null,
+        ?CoreBillsPaymentService $coreService = null,
+        ?LaravelHttpClient $laravelHttpClient = null,
+    ) {
         parent::__construct($client);
         $this->validator = $validator ?? new BillsPaymentValidator();
+        $this->laravelHttpClient = $laravelHttpClient ?? new LaravelHttpClient($client);
+        $this->coreService = $coreService ?? new CoreBillsPaymentService($this->buildCoreClient($client, $this->laravelHttpClient));
     }
 
     /**
@@ -27,7 +42,10 @@ class BillsPaymentService extends BaseService
 
         $this->validator->validatePagination($parameters);
 
-        return $this->requestGet('/api/v1/vas/bills-payment/biller-categories', $parameters);
+        return $this->mapSdkResponse(
+            $this->laravelHttpClient,
+            fn () => $this->coreService->categories($pageSize, $pageNumber),
+        );
     }
 
     /**
@@ -40,13 +58,16 @@ class BillsPaymentService extends BaseService
             'page' => $pageNumber,
         ];
 
-        if (!empty($categoryCode)) {
+        if (! empty($categoryCode)) {
             $parameters['category_code'] = $categoryCode;
         }
 
         $this->validator->validateBillers($parameters);
 
-        return $this->requestGet('/api/v1/vas/bills-payment/billers', $parameters);
+        return $this->mapSdkResponse(
+            $this->laravelHttpClient,
+            fn () => $this->coreService->billers($categoryCode, $pageSize, $pageNumber),
+        );
     }
 
     /**
@@ -56,20 +77,26 @@ class BillsPaymentService extends BaseService
     {
         $parameters = [
             'biller_code' => $billerCode,
-            'size'        => $pageSize,
-            'page'        => $pageNumber,
+            'size' => $pageSize,
+            'page' => $pageNumber,
         ];
 
         $this->validator->validateProducts($parameters);
 
-        return $this->requestGet('/api/v1/vas/bills-payment/biller-products', $parameters);
+        return $this->mapSdkResponse(
+            $this->laravelHttpClient,
+            fn () => $this->coreService->products($billerCode, $pageSize, $pageNumber),
+        );
     }
 
     public function validateCustomer(array $data): array
     {
         $this->validator->validateCustomer($data);
 
-        return $this->requestPost('/api/v1/vas/bills-payment/validate-customer', $data);
+        return $this->mapSdkResponse(
+            $this->laravelHttpClient,
+            fn () => $this->coreService->validateCustomer($data),
+        );
     }
 
     /**
@@ -79,7 +106,10 @@ class BillsPaymentService extends BaseService
     {
         $this->validator->validateVend($data);
 
-        return $this->requestPost('/api/v1/vas/bills-payment/vend', $data);
+        return $this->mapSdkResponse(
+            $this->laravelHttpClient,
+            fn () => $this->coreService->vend($data),
+        );
     }
 
     /**
@@ -89,6 +119,9 @@ class BillsPaymentService extends BaseService
     {
         $this->validator->validateRequery(['vendReference' => $vendReference]);
 
-        return $this->requestGet('/api/v1/vas/bills-payment/requery', ['vendReference' => $vendReference]);
+        return $this->mapSdkResponse(
+            $this->laravelHttpClient,
+            fn () => $this->coreService->requery($vendReference),
+        );
     }
 }

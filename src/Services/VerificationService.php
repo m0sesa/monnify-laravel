@@ -4,43 +4,57 @@ namespace Monnify\MonnifyLaravel\Services;
 
 use GuzzleHttp\Client;
 use InvalidArgumentException;
+use Monnify\MonnifyLaravel\Support\BuildsCoreClient;
+use Monnify\MonnifyLaravel\Support\LaravelHttpClient;
+use Monnify\MonnifyLaravel\Support\MapsSdkResponses;
 use Monnify\MonnifyLaravel\Validators\VerificationValidator;
+use Monnify\Services\VerificationService as CoreVerificationService;
 
 class VerificationService extends BaseService
 {
-    private VerificationValidator $validator;
+    use BuildsCoreClient;
+    use MapsSdkResponses;
 
-    public function __construct(Client $client, ?VerificationValidator $validator = null)
-    {
+    private VerificationValidator $validator;
+    private LaravelHttpClient $laravelHttpClient;
+    private CoreVerificationService $coreService;
+
+    public function __construct(
+        Client $client,
+        ?VerificationValidator $validator = null,
+        ?CoreVerificationService $coreService = null,
+        ?LaravelHttpClient $laravelHttpClient = null,
+    ) {
         parent::__construct($client);
         $this->validator = $validator ?? new VerificationValidator();
+        $this->laravelHttpClient = $laravelHttpClient ?? new LaravelHttpClient($client);
+        $this->coreService = $coreService ?? new CoreVerificationService($this->buildCoreClient($client, $this->laravelHttpClient));
     }
 
     public function bankAccount(string $accountNumber, string $bankCode): array
     {
-        $parameters = [
-            'accountNumber' => $accountNumber,
-            'bankCode' => $bankCode
-        ];
-
-        return $this->requestGet('/api/v1/disbursements/account/validate', $parameters);
+        return $this->mapSdkResponse(
+            $this->laravelHttpClient,
+            fn () => $this->coreService->bankAccount($accountNumber, $bankCode),
+        );
     }
 
     public function bvnInformation(array $data): array
     {
         $this->validator->validateBVNInformation($data);
-        return $this->requestPost('/api/v1/vas/bvn-details-match', $data);
+
+        return $this->mapSdkResponse(
+            $this->laravelHttpClient,
+            fn () => $this->coreService->bvnInformation($data),
+        );
     }
 
     public function matchBVNAndBankAccount(string $bvn, string $bankCode, string $accountNumber): array
     {
-        $data = [
-            'bvn' => $bvn,
-            'bankCode' => $bankCode,
-            'accountNumber' => $accountNumber
-        ];
-
-        return $this->requestPost('/api/v1/vas/bvn-account-match', $data);
+        return $this->mapSdkResponse(
+            $this->laravelHttpClient,
+            fn () => $this->coreService->matchBVNAndBankAccount($bvn, $bankCode, $accountNumber),
+        );
     }
 
     public function nin(string $nin): array
@@ -49,10 +63,9 @@ class VerificationService extends BaseService
             throw new InvalidArgumentException('NIN must be provided.');
         }
 
-        $data = [
-            'nin' => $nin
-        ];
-
-        return $this->requestPost('/api/v1/vas/nin-details', $data);
+        return $this->mapSdkResponse(
+            $this->laravelHttpClient,
+            fn () => $this->coreService->nin($nin),
+        );
     }
 }
