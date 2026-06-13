@@ -10,7 +10,7 @@ use Monnify\MonnifyLaravel\Support\MapsSdkResponses;
 use Monnify\MonnifyLaravel\Validators\InvoiceValidator;
 use Monnify\Services\InvoiceService as CoreInvoiceService;
 
-class InvoiceService extends BaseService
+class InvoiceService
 {
     use BuildsCoreClient;
     use MapsSdkResponses;
@@ -25,7 +25,6 @@ class InvoiceService extends BaseService
         ?CoreInvoiceService $coreService = null,
         ?LaravelHttpClient $laravelHttpClient = null,
     ) {
-        parent::__construct($client);
         $this->validator = $validator ?? new InvoiceValidator();
         $this->laravelHttpClient = $laravelHttpClient ?? new LaravelHttpClient($client);
         $this->coreService = $coreService ?? new CoreInvoiceService($this->buildCoreClient($client, $this->laravelHttpClient));

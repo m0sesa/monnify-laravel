@@ -9,7 +9,7 @@ use Monnify\MonnifyLaravel\Support\LaravelHttpClient;
 use Monnify\MonnifyLaravel\Support\MapsSdkResponses;
 use Monnify\Services\SettlementService as CoreSettlementService;
 
-class SettlementService extends BaseService
+class SettlementService
 {
     use BuildsCoreClient;
     use MapsSdkResponses;
@@ -22,7 +22,6 @@ class SettlementService extends BaseService
         ?CoreSettlementService $coreService = null,
         ?LaravelHttpClient $laravelHttpClient = null,
     ) {
-        parent::__construct($client);
         $this->laravelHttpClient = $laravelHttpClient ?? new LaravelHttpClient($client);
         $this->coreService = $coreService ?? new CoreSettlementService($this->buildCoreClient($client, $this->laravelHttpClient));
     }

@@ -10,7 +10,7 @@ use Monnify\MonnifyLaravel\Support\MapsSdkResponses;
 use Monnify\MonnifyLaravel\Validators\DirectDebitValidator;
 use Monnify\Services\DirectDebitService as CoreDirectDebitService;
 
-class DirectDebitService extends BaseService
+class DirectDebitService
 {
     use BuildsCoreClient;
     use MapsSdkResponses;
@@ -25,7 +25,6 @@ class DirectDebitService extends BaseService
         ?CoreDirectDebitService $coreService = null,
         ?LaravelHttpClient $laravelHttpClient = null,
     ) {
-        parent::__construct($client);
         $this->validator = $validator ?? new DirectDebitValidator();
         $this->laravelHttpClient = $laravelHttpClient ?? new LaravelHttpClient($client);
         $this->coreService = $coreService ?? new CoreDirectDebitService($this->buildCoreClient($client, $this->laravelHttpClient));

@@ -10,7 +10,7 @@ use Monnify\MonnifyLaravel\Support\MapsSdkResponses;
 use Monnify\MonnifyLaravel\Validators\LimitProfileValidator;
 use Monnify\Services\LimitProfileService as CoreLimitProfileService;
 
-class LimitProfileService extends BaseService
+class LimitProfileService
 {
     use BuildsCoreClient;
     use MapsSdkResponses;
@@ -25,7 +25,6 @@ class LimitProfileService extends BaseService
         ?CoreLimitProfileService $coreService = null,
         ?LaravelHttpClient $laravelHttpClient = null,
     ) {
-        parent::__construct($client);
         $this->validator = $validator ?? new LimitProfileValidator();
         $this->laravelHttpClient = $laravelHttpClient ?? new LaravelHttpClient($client);
         $this->coreService = $coreService ?? new CoreLimitProfileService($this->buildCoreClient($client, $this->laravelHttpClient));

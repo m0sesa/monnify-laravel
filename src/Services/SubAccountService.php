@@ -10,7 +10,7 @@ use Monnify\MonnifyLaravel\Support\MapsSdkResponses;
 use Monnify\MonnifyLaravel\Validators\SubAccountValidator;
 use Monnify\Services\SubAccountService as CoreSubAccountService;
 
-class SubAccountService extends BaseService
+class SubAccountService
 {
     use BuildsCoreClient;
     use MapsSdkResponses;
@@ -25,7 +25,6 @@ class SubAccountService extends BaseService
         ?CoreSubAccountService $coreService = null,
         ?LaravelHttpClient $laravelHttpClient = null,
     ) {
-        parent::__construct($client);
         $this->validator = $validator ?? new SubAccountValidator();
         $this->laravelHttpClient = $laravelHttpClient ?? new LaravelHttpClient($client);
         $this->coreService = $coreService ?? new CoreSubAccountService($this->buildCoreClient($client, $this->laravelHttpClient));

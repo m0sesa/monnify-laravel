@@ -10,7 +10,7 @@ use Monnify\MonnifyLaravel\Support\MapsSdkResponses;
 use Monnify\MonnifyLaravel\Validators\CustomerReservedAccountValidator;
 use Monnify\Services\CustomerReservedAccountService as CoreCustomerReservedAccountService;
 
-class CustomerReservedAccountService extends BaseService
+class CustomerReservedAccountService
 {
     use BuildsCoreClient;
     use MapsSdkResponses;
@@ -25,7 +25,6 @@ class CustomerReservedAccountService extends BaseService
         ?CoreCustomerReservedAccountService $coreService = null,
         ?LaravelHttpClient $laravelHttpClient = null,
     ) {
-        parent::__construct($client);
         $this->validator = $validator ?? new CustomerReservedAccountValidator();
         $this->laravelHttpClient = $laravelHttpClient ?? new LaravelHttpClient($client);
         $this->coreService = $coreService ?? new CoreCustomerReservedAccountService($this->buildCoreClient($client, $this->laravelHttpClient));

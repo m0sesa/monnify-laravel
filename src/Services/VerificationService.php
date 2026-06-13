@@ -10,7 +10,7 @@ use Monnify\MonnifyLaravel\Support\MapsSdkResponses;
 use Monnify\MonnifyLaravel\Validators\VerificationValidator;
 use Monnify\Services\VerificationService as CoreVerificationService;
 
-class VerificationService extends BaseService
+class VerificationService
 {
     use BuildsCoreClient;
     use MapsSdkResponses;
@@ -25,7 +25,6 @@ class VerificationService extends BaseService
         ?CoreVerificationService $coreService = null,
         ?LaravelHttpClient $laravelHttpClient = null,
     ) {
-        parent::__construct($client);
         $this->validator = $validator ?? new VerificationValidator();
         $this->laravelHttpClient = $laravelHttpClient ?? new LaravelHttpClient($client);
         $this->coreService = $coreService ?? new CoreVerificationService($this->buildCoreClient($client, $this->laravelHttpClient));

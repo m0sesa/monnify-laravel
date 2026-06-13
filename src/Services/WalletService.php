@@ -10,7 +10,7 @@ use Monnify\MonnifyLaravel\Support\MapsSdkResponses;
 use Monnify\MonnifyLaravel\Validators\WalletValidator;
 use Monnify\Services\WalletService as CoreWalletService;
 
-class WalletService extends BaseService
+class WalletService
 {
     use BuildsCoreClient;
     use MapsSdkResponses;
@@ -25,7 +25,6 @@ class WalletService extends BaseService
         ?CoreWalletService $coreService = null,
         ?LaravelHttpClient $laravelHttpClient = null,
     ) {
-        parent::__construct($client);
         $this->validator = $validator ?? new WalletValidator();
         $this->laravelHttpClient = $laravelHttpClient ?? new LaravelHttpClient($client);
         $this->coreService = $coreService ?? new CoreWalletService($this->buildCoreClient($client, $this->laravelHttpClient));

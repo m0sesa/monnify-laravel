@@ -9,7 +9,7 @@ use Monnify\MonnifyLaravel\Support\MapsSdkResponses;
 use Monnify\MonnifyLaravel\Validators\RecurringPaymentValidator;
 use Monnify\Services\RecurringPaymentService as CoreRecurringPaymentService;
 
-class RecurringPaymentService extends BaseService
+class RecurringPaymentService
 {
     use BuildsCoreClient;
     use MapsSdkResponses;
@@ -24,7 +24,6 @@ class RecurringPaymentService extends BaseService
         ?CoreRecurringPaymentService $coreService = null,
         ?LaravelHttpClient $laravelHttpClient = null,
     ) {
-        parent::__construct($client);
         $this->validator = $validator ?? new RecurringPaymentValidator();
         $this->laravelHttpClient = $laravelHttpClient ?? new LaravelHttpClient($client);
         $this->coreService = $coreService ?? new CoreRecurringPaymentService($this->buildCoreClient($client, $this->laravelHttpClient));

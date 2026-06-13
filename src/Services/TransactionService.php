@@ -10,7 +10,7 @@ use Monnify\MonnifyLaravel\Support\MapsSdkResponses;
 use Monnify\MonnifyLaravel\Validators\TransactionValidator;
 use Monnify\Services\TransactionService as CoreTransactionService;
 
-class TransactionService extends BaseService
+class TransactionService
 {
     use BuildsCoreClient;
     use MapsSdkResponses;
@@ -25,7 +25,6 @@ class TransactionService extends BaseService
         ?CoreTransactionService $coreService = null,
         ?LaravelHttpClient $laravelHttpClient = null,
     ) {
-        parent::__construct($client);
         $this->validator = $validator ?? new TransactionValidator();
         $this->laravelHttpClient = $laravelHttpClient ?? new LaravelHttpClient($client);
         $this->coreService = $coreService ?? new CoreTransactionService($this->buildCoreClient($client, $this->laravelHttpClient));

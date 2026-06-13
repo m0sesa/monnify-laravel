@@ -9,7 +9,7 @@ use Monnify\MonnifyLaravel\Support\MapsSdkResponses;
 use Monnify\MonnifyLaravel\Validators\BillsPaymentValidator;
 use Monnify\Services\BillsPaymentService as CoreBillsPaymentService;
 
-class BillsPaymentService extends BaseService
+class BillsPaymentService
 {
     use BuildsCoreClient;
     use MapsSdkResponses;
@@ -24,7 +24,6 @@ class BillsPaymentService extends BaseService
         ?CoreBillsPaymentService $coreService = null,
         ?LaravelHttpClient $laravelHttpClient = null,
     ) {
-        parent::__construct($client);
         $this->validator = $validator ?? new BillsPaymentValidator();
         $this->laravelHttpClient = $laravelHttpClient ?? new LaravelHttpClient($client);
         $this->coreService = $coreService ?? new CoreBillsPaymentService($this->buildCoreClient($client, $this->laravelHttpClient));

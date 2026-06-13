@@ -10,7 +10,7 @@ use Monnify\MonnifyLaravel\Support\MapsSdkResponses;
 use Monnify\MonnifyLaravel\Validators\PayCodeValidator;
 use Monnify\Services\PayCodeService as CorePayCodeService;
 
-class PayCodeService extends BaseService
+class PayCodeService
 {
     use BuildsCoreClient;
     use MapsSdkResponses;
@@ -25,7 +25,6 @@ class PayCodeService extends BaseService
         ?CorePayCodeService $coreService = null,
         ?LaravelHttpClient $laravelHttpClient = null,
     ) {
-        parent::__construct($client);
         $this->validator = $validator ?? new PayCodeValidator();
         $this->laravelHttpClient = $laravelHttpClient ?? new LaravelHttpClient($client);
         $this->coreService = $coreService ?? new CorePayCodeService($this->buildCoreClient($client, $this->laravelHttpClient));

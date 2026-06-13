@@ -8,7 +8,7 @@ use Monnify\MonnifyLaravel\Support\LaravelHttpClient;
 use Monnify\MonnifyLaravel\Support\MapsSdkResponses;
 use Monnify\Services\OtherService as CoreOtherService;
 
-class OtherService extends BaseService
+class OtherService
 {
     use BuildsCoreClient;
     use MapsSdkResponses;
@@ -21,7 +21,6 @@ class OtherService extends BaseService
         ?CoreOtherService $coreService = null,
         ?LaravelHttpClient $laravelHttpClient = null,
     ) {
-        parent::__construct($client);
         $this->laravelHttpClient = $laravelHttpClient ?? new LaravelHttpClient($client);
         $this->coreService = $coreService ?? new CoreOtherService($this->buildCoreClient($client, $this->laravelHttpClient));
     }

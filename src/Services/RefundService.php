@@ -10,7 +10,7 @@ use Monnify\MonnifyLaravel\Support\MapsSdkResponses;
 use Monnify\MonnifyLaravel\Validators\RefundValidator;
 use Monnify\Services\RefundService as CoreRefundService;
 
-class RefundService extends BaseService
+class RefundService
 {
     use BuildsCoreClient;
     use MapsSdkResponses;
@@ -25,7 +25,6 @@ class RefundService extends BaseService
         ?CoreRefundService $coreService = null,
         ?LaravelHttpClient $laravelHttpClient = null,
     ) {
-        parent::__construct($client);
         $this->validator = $validator ?? new RefundValidator();
         $this->laravelHttpClient = $laravelHttpClient ?? new LaravelHttpClient($client);
         $this->coreService = $coreService ?? new CoreRefundService($this->buildCoreClient($client, $this->laravelHttpClient));

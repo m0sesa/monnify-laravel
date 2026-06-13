@@ -10,7 +10,7 @@ use Monnify\MonnifyLaravel\Support\MapsSdkResponses;
 use Monnify\MonnifyLaravel\Validators\DisbursementValidator;
 use Monnify\Services\DisbursementService as CoreDisbursementService;
 
-class DisbursementService extends BaseService
+class DisbursementService
 {
     use BuildsCoreClient;
     use MapsSdkResponses;
@@ -25,7 +25,6 @@ class DisbursementService extends BaseService
         ?CoreDisbursementService $coreService = null,
         ?LaravelHttpClient $laravelHttpClient = null,
     ) {
-        parent::__construct($client);
         $this->validator = $validator ?? new DisbursementValidator();
         $this->laravelHttpClient = $laravelHttpClient ?? new LaravelHttpClient($client);
         $this->coreService = $coreService ?? new CoreDisbursementService($this->buildCoreClient($client, $this->laravelHttpClient));
